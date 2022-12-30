@@ -92,6 +92,10 @@ export class PostMapper {
   }
 
   public mapToArrayPostDto(posts: Post[]): PostDto[] {
-    return [];
+    const postsDto: PostDto[] = [];
+    posts.map((post) => {
+      postsDto.push(this.mapToPostDto(post));
+    });
+    return postsDto;
   }
 }

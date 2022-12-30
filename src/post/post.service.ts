@@ -73,6 +73,7 @@ export class PostService implements OnModuleInit {
   public async findAll(): Promise<FindAllPostResponse> {
     const posts: Post[] = await this.postRepository.findAll();
     const postsDto: PostDto[] = this.postMapper.mapToArrayPostDto(posts);
+
     return { posts: postsDto };
   }
 
