@@ -6,20 +6,20 @@ import { CreatePostResponse, FindAllPostResponse, FindOnePostResponse, POST_SERV
 @Controller('post')
 export class PostController {
   @Inject(PostService)
-  private readonly postService: PostService;
+  private readonly service: PostService;
 
   @GrpcMethod(POST_SERVICE_NAME, 'Create')
   private async create(payload): Promise<CreatePostResponse> {
-    return this.postService.create(payload);
+    return this.service.create(payload);
   }
 
   @GrpcMethod(POST_SERVICE_NAME, 'FindOne')
   private async findOne(payload): Promise<FindOnePostResponse> {
-    return this.postService.findOne(payload);
+    return this.service.findOne(payload);
   }
 
   @GrpcMethod(POST_SERVICE_NAME, 'FindAll')
   private async findAll(): Promise<FindAllPostResponse> {
-    return this.postService.findAll();
+    return this.service.findAll();
   }
 }

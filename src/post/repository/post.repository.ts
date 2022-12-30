@@ -7,11 +7,11 @@ export class PostRepository {
   private readonly postRepository: Repository<Post>;
 
   public async save(post: Post): Promise<Post> {
-    return this.postRepository.save(post);
+    return await this.postRepository.save(post);
   }
 
   public async findAll(): Promise<Post[]> {
-    return this.postRepository.find({
+    return await this.postRepository.find({
       relations: {
         info: true,
         images: true,
@@ -20,7 +20,7 @@ export class PostRepository {
   }
 
   public async findOne(uuid: string): Promise<Post> {
-    return this.postRepository.findOne({
+    return await this.postRepository.findOne({
       where: {
         postUuid: uuid,
       },

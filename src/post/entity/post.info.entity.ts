@@ -1,9 +1,9 @@
-import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('post_info')
 export class PostInfo extends BaseEntity {
-  @PrimaryColumn({ name: 'info_id' })
-  public infoId!: string;
+  @PrimaryGeneratedColumn('increment', { name: 'info_id' })
+  public infoId!: number;
 
   @Column({ name: 'price', nullable: false, type: 'numeric' })
   public price!: number;

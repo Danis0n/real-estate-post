@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { PostRepository } from './repository/post.repository';
 import {
   IMAGE_SERVICE_NAME,
@@ -54,11 +54,12 @@ export class PostService implements OnModuleInit {
       }),
     );
 
-    const postImage: PostImage[] = this.postImageMapper.mapToNewPostImages(
+    const postImages: PostImage[] = this.postImageMapper.mapToNewPostImages(
       response.imagesUuids,
     );
+
     post.images = [];
-    for (const image of postImage) {
+    for (const image of postImages) {
       post.images.push(await this.postImageRepository.save(image));
     }
 
@@ -66,7 +67,7 @@ export class PostService implements OnModuleInit {
       await this.postRepository.save(post),
     );
 
-    return { post: postDto, error: null, status: '200' };
+    return { post: postDto, error: null, status: HttpStatus.OK };
   }
 
   public async findAll(): Promise<FindAllPostResponse> {
@@ -79,7 +80,7 @@ export class PostService implements OnModuleInit {
     const post: Post = await this.postRepository.findOne(dto.uuid);
     return {
       post: this.postMapper.mapToPostDto(post),
-      status: '200',
+      status: HttpStatus.OK,
       error: null,
     };
   }

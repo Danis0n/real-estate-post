@@ -3,11 +3,11 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable, ManyToMany,
-  OneToMany,
+  JoinTable,
+  ManyToMany,
   OneToOne,
-  PrimaryColumn
-} from "typeorm";
+  PrimaryColumn,
+} from 'typeorm';
 import { PostInfo } from './post.info.entity';
 import { PostImage } from './image.info.entity';
 
@@ -37,9 +37,9 @@ export class Post extends BaseEntity {
   @Column({ name: 'post_property_type', nullable: false, type: 'varchar' })
   public type!: string;
 
-  @OneToOne(() => PostInfo, { cascade: true, nullable: true })
+  @OneToOne(() => PostInfo, { cascade: true })
   @JoinColumn({ name: 'post_info_id' })
-  public info: PostInfo;
+  public info!: PostInfo;
 
   @ManyToMany(() => PostImage, (image) => image.post)
   @JoinTable({
