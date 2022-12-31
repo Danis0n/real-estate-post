@@ -11,6 +11,10 @@ import {
   FindAllPostResponse,
   FindOnePostRequest,
   FindOnePostResponse,
+  UpdateImagesRequest,
+  UpdateImagesResponse,
+  UpdatePostRequest,
+  UpdatePostResponse,
 } from './proto/post.pb';
 import { Post } from './entity/post.entity';
 import { PostMapper } from './mapper/post.mapper';
@@ -84,5 +88,15 @@ export class PostService implements OnModuleInit {
       status: HttpStatus.OK,
       error: null,
     };
+  }
+
+  public async update(dto: UpdatePostRequest): Promise<UpdatePostResponse> {
+    return null;
+  }
+
+  public async updateImages(
+    dto: UpdateImagesRequest,
+  ): Promise<UpdateImagesResponse> {
+    return null;
   }
 }

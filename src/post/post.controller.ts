@@ -1,7 +1,14 @@
 import { Controller, Inject } from '@nestjs/common';
 import { PostService } from './post.service';
 import { GrpcMethod } from '@nestjs/microservices';
-import { CreatePostResponse, FindAllPostResponse, FindOnePostResponse, POST_SERVICE_NAME } from "./proto/post.pb";
+import {
+  CreatePostResponse,
+  FindAllPostResponse,
+  FindOnePostResponse,
+  POST_SERVICE_NAME,
+  UpdateImagesResponse,
+  UpdatePostResponse,
+} from './proto/post.pb';
 
 @Controller('post')
 export class PostController {
@@ -21,5 +28,15 @@ export class PostController {
   @GrpcMethod(POST_SERVICE_NAME, 'FindAll')
   private async findAll(): Promise<FindAllPostResponse> {
     return this.service.findAll();
+  }
+
+  @GrpcMethod(POST_SERVICE_NAME, 'UpdatePost')
+  private async update(payload): Promise<UpdatePostResponse> {
+    return this.service.update(payload);
+  }
+
+  @GrpcMethod(POST_SERVICE_NAME, 'UpdateImages')
+  private async updateImages(payload): Promise<UpdateImagesResponse> {
+    return this.service.updateImages(payload);
   }
 }
