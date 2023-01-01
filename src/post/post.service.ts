@@ -3,6 +3,7 @@ import { PostRepository } from './repository/post.repository';
 import {
   IMAGE_SERVICE_NAME,
   ImagePostResponse,
+  ImagesDeleteResponse,
   ImageServiceClient,
 } from './proto/image.pb';
 import { ClientGrpc } from '@nestjs/microservices';
@@ -97,6 +98,66 @@ export class PostService implements OnModuleInit {
   public async updateImages(
     dto: UpdateImagesRequest,
   ): Promise<UpdateImagesResponse> {
-    return null;
+    const post: Post = await this.postRepository.findOne(dto.uuid);
+
+    if (post == null || post.userId != dto.userUuid)
+      return {
+        error: 'Объявление не принадлежит пользователю или отсутствует',
+        status: HttpStatus.BAD_REQUEST,
+      };
+
+    if (
+      post.images.length +
+        (dto.createImages.length ? dto.createImages.length : 0) -
+        (dto.deleteImages.length ? dto.deleteImages.length : 0) >
+      10
+    )
+      return {
+        error: 'Количество изображений не может быть больше 10',
+        status: HttpStatus.BAD_REQUEST,
+      };
+
+    if (dto.deleteImages && dto.deleteImages.length >= 1) {
+      const deleteImagesResponse: ImagesDeleteResponse = await firstValueFrom(
+        this.imageSvc.imagesDelete({ uuids: dto.deleteImages }),
+      );
+
+      if (deleteImagesResponse.status == HttpStatus.BAD_REQUEST)
+        return {
+          error: 'Нет данных изображений',
+          status: HttpStatus.BAD_REQUEST,
+        };
+
+      dto.deleteImages.map((id) => {
+        post.images = post.images.filter((item) => item.imageUuid !== id);
+      });
+    }
+
+    if (dto.createImages && dto.createImages.length >= 1) {
+      const response: ImagePostResponse = await firstValueFrom(
+        this.imageSvc.imageUploadPost({
+          images: dto.createImages,
+          uuid: post.postUuid,
+        }),
+      );
+
+      if (response.status != HttpStatus.OK) {
+        return {
+          error: 'Ошибка при добавлении изображения',
+          status: HttpStatus.BAD_REQUEST,
+        };
+      }
+
+      const postImages: PostImage[] = this.postImageMapper.mapToNewPostImages(
+        response.imagesUuids,
+      );
+
+      for (const image of postImages) {
+        post.images.push(await this.postImageRepository.save(image));
+      }
+    }
+
+    await this.postRepository.save(post);
+    return { error: null, status: HttpStatus.OK };
   }
 }
