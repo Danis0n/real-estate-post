@@ -14,10 +14,10 @@ import { PostImage } from './image.info.entity';
 @Entity('post')
 export class Post extends BaseEntity {
   @PrimaryColumn({ name: 'post_id' })
-  public postUuid!: string;
+  public postUUID!: string;
 
   @Column({ name: 'post_user_id', nullable: false, type: 'uuid' })
-  public userId!: string;
+  public userUUID!: string;
 
   @Column({ name: 'post_name', nullable: false, type: 'varchar' })
   public name!: string;
@@ -52,11 +52,11 @@ export class Post extends BaseEntity {
     name: 'post_image',
     joinColumn: {
       name: 'post_id',
-      referencedColumnName: 'postUuid',
+      referencedColumnName: 'postUUID',
     },
     inverseJoinColumn: {
       name: 'image_id',
-      referencedColumnName: 'imageUuid',
+      referencedColumnName: 'imageUUID',
     },
   })
   public images!: PostImage[];

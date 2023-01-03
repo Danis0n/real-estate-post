@@ -7,8 +7,8 @@ import {
 } from '../proto/post.pb';
 
 export class PostDto implements Post {
-  public postUuid!: string;
-  public userId!: string;
+  public postUUID!: string;
+  public userUUID!: string;
   public name!: string;
   public dateOfCreation!: string;
   public location!: string;
@@ -64,7 +64,7 @@ export class CreatePostDto implements CreatePostRequest {
   public readonly price: string;
   public readonly roomQuantity: string;
   public readonly type: string;
-  public readonly userId: string;
+  public readonly userUUID: string;
   public readonly images: ImageCreateDto[];
 }
 

@@ -17,8 +17,8 @@ export class PostMapper {
 
   private fillPost(dto: CreatePostDto): Post {
     const post: Post = new Post();
-    post.postUuid = uuidv4();
-    post.userId = dto.userId;
+    post.postUUID = uuidv4();
+    post.userUUID = dto.userUUID;
     post.name = dto.name;
     post.deal = dto.deal;
     post.type = dto.type;
@@ -57,8 +57,8 @@ export class PostMapper {
     const postDto: PostDto = new PostDto();
     postDto.info = this.mapToPostInfoDto(post.info);
 
-    postDto.postUuid = post.postUuid;
-    postDto.userId = post.userId;
+    postDto.postUUID = post.postUUID;
+    postDto.userUUID = post.userUUID;
     postDto.name = post.name;
     postDto.deal = post.deal;
     postDto.type = post.type;

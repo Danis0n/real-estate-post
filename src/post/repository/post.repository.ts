@@ -22,7 +22,7 @@ export class PostRepository {
   public async findOne(uuid: string): Promise<Post> {
     return await this.postRepository.findOne({
       where: {
-        postUuid: uuid,
+        postUUID: uuid,
       },
       relations: {
         info: true,

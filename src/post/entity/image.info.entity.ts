@@ -1,10 +1,17 @@
-import { BaseEntity, Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { Post } from './post.entity';
 
 @Entity('image_info_post')
 export class PostImage extends BaseEntity {
   @PrimaryColumn({ name: 'image_id' })
-  public imageUuid!: string;
+  public imageUUID!: string;
 
   @Column({ name: 'image_date', nullable: false, type: 'date' })
   public date!: Date;
@@ -14,11 +21,11 @@ export class PostImage extends BaseEntity {
     name: 'post_image',
     joinColumn: {
       name: 'image_id',
-      referencedColumnName: 'imageUuid',
+      referencedColumnName: 'imageUUID',
     },
     inverseJoinColumn: {
       name: 'post_id',
-      referencedColumnName: 'postUuid',
+      referencedColumnName: 'postUUID',
     },
   })
   public post: Post;

@@ -4,7 +4,7 @@ import { PostImageDto } from '../dto/post.dto';
 export class PostImageMapper {
   public mapToNewPostImage(uuid: string): PostImage {
     const postImage: PostImage = new PostImage();
-    postImage.imageUuid = uuid;
+    postImage.imageUUID = uuid;
     postImage.date = new Date();
     return postImage;
   }
@@ -12,7 +12,7 @@ export class PostImageMapper {
   public mapToPostImageDto(image: PostImage): PostImageDto {
     const imageDto: PostImageDto = new PostImageDto();
     imageDto.date = image.date.toString();
-    imageDto.imageUuid = image.imageUuid;
+    imageDto.imageUuid = image.imageUUID;
     return imageDto;
   }
 
@@ -21,7 +21,7 @@ export class PostImageMapper {
 
     uuids.forEach((uuid) => {
       const image: PostImage = new PostImage();
-      image.imageUuid = uuid;
+      image.imageUUID = uuid;
       image.date = new Date();
       images.push(image);
     });

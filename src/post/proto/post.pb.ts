@@ -4,6 +4,27 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "post";
 
+export interface LockPostAdminStateRequest {
+  postUUID: string;
+  state: boolean;
+}
+
+export interface LockPostAdminStateResponse {
+  status: number;
+  error: string;
+}
+
+export interface LockPostStateRequest {
+  postUUID: string;
+  userUUID: string;
+  state: boolean;
+}
+
+export interface LockPostStateResponse {
+  status: number;
+  error: string;
+}
+
 export interface UpdatePostRequest {
   name: string;
   price: string;
@@ -15,8 +36,8 @@ export interface UpdatePostRequest {
   kitchenDimensions: string;
   livingDimensions: string;
   description: string;
-  uuid: string;
-  userUuid: string;
+  UUID: string;
+  userUUID: string;
 }
 
 export interface UpdatePostResponse {
@@ -25,8 +46,8 @@ export interface UpdatePostResponse {
 }
 
 export interface UpdateImagesRequest {
-  uuid: string;
-  userUuid: string;
+  UUID: string;
+  userUUID: string;
   createImages: ImageCreate[];
   deleteImages: string[];
 }
@@ -64,7 +85,7 @@ export interface CreatePostRequest {
   location: string;
   deal: string;
   type: string;
-  userId: string;
+  userUUID: string;
   images: ImageCreate[];
 }
 
@@ -82,7 +103,7 @@ export interface FindAllPostResponse {
 }
 
 export interface FindOnePostRequest {
-  uuid: string;
+  UUID: string;
 }
 
 export interface FindOnePostResponse {
@@ -92,8 +113,8 @@ export interface FindOnePostResponse {
 }
 
 export interface Post {
-  postUuid: string;
-  userId: string;
+  postUUID: string;
+  userUUID: string;
   name: string;
   dateOfCreation: string;
   location: string;
@@ -141,6 +162,10 @@ export interface PostServiceClient {
   updateImages(request: UpdateImagesRequest): Observable<UpdateImagesResponse>;
 
   updatePost(request: UpdatePostRequest): Observable<UpdatePostResponse>;
+
+  updateLockPostRequest(request: LockPostStateRequest): Observable<LockPostStateResponse>;
+
+  updateLockPostAdminRequest(request: LockPostAdminStateRequest): Observable<LockPostAdminStateResponse>;
 }
 
 export interface PostServiceController {
@@ -161,11 +186,27 @@ export interface PostServiceController {
   updatePost(
     request: UpdatePostRequest,
   ): Promise<UpdatePostResponse> | Observable<UpdatePostResponse> | UpdatePostResponse;
+
+  updateLockPostRequest(
+    request: LockPostStateRequest,
+  ): Promise<LockPostStateResponse> | Observable<LockPostStateResponse> | LockPostStateResponse;
+
+  updateLockPostAdminRequest(
+    request: LockPostAdminStateRequest,
+  ): Promise<LockPostAdminStateResponse> | Observable<LockPostAdminStateResponse> | LockPostAdminStateResponse;
 }
 
 export function PostServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["create", "findOne", "findAll", "updateImages", "updatePost"];
+    const grpcMethods: string[] = [
+      "create",
+      "findOne",
+      "findAll",
+      "updateImages",
+      "updatePost",
+      "updateLockPostRequest",
+      "updateLockPostAdminRequest",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("PostService", method)(constructor.prototype[method], method, descriptor);

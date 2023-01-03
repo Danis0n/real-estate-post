@@ -12,6 +12,10 @@ import {
   FindAllPostResponse,
   FindOnePostRequest,
   FindOnePostResponse,
+  LockPostAdminStateRequest,
+  LockPostAdminStateResponse,
+  LockPostStateRequest,
+  LockPostStateResponse,
   UpdateImagesRequest,
   UpdateImagesResponse,
   UpdatePostRequest,
@@ -55,7 +59,7 @@ export class PostService implements OnModuleInit {
     const response: ImagePostResponse = await firstValueFrom(
       this.imageSvc.imageUploadPost({
         images: dto.images,
-        uuid: post.postUuid,
+        UUID: post.postUUID,
       }),
     );
 
@@ -83,7 +87,7 @@ export class PostService implements OnModuleInit {
   }
 
   public async findOne(dto: FindOnePostRequest): Promise<FindOnePostResponse> {
-    const post: Post = await this.postRepository.findOne(dto.uuid);
+    const post: Post = await this.postRepository.findOne(dto.UUID);
 
     if (post == null)
       return {
@@ -100,9 +104,9 @@ export class PostService implements OnModuleInit {
   }
 
   public async update(dto: UpdatePostRequest): Promise<UpdatePostResponse> {
-    const post: Post = await this.postRepository.findOne(dto.uuid);
+    const post: Post = await this.postRepository.findOne(dto.UUID);
 
-    if (post == null || post.userId != dto.userUuid) {
+    if (post == null || post.userUUID != dto.userUUID) {
       return {
         error: 'Искомый пост не был найден или вы не являетесь владельцем',
         status: HttpStatus.BAD_REQUEST,
@@ -116,8 +120,8 @@ export class PostService implements OnModuleInit {
   }
 
   private updateState(post: Post, dto: UpdatePostRequest) {
-    if (dto.isBalcony != null) post.info.isBalcony = Boolean(dto.isBalcony);
-    if (dto.isParking != null) post.info.isParking = Boolean(dto.isParking);
+    if (dto.isBalcony != null) post.info.isBalcony = dto.isBalcony;
+    if (dto.isParking != null) post.info.isParking = dto.isParking;
     if (dto.isRenovation != null)
       post.info.isRenovation = Boolean(dto.isRenovation);
     if (dto.description) post.info.description = dto.description;
@@ -133,9 +137,9 @@ export class PostService implements OnModuleInit {
   public async updateImages(
     dto: UpdateImagesRequest,
   ): Promise<UpdateImagesResponse> {
-    const post: Post = await this.postRepository.findOne(dto.uuid);
+    const post: Post = await this.postRepository.findOne(dto.UUID);
 
-    if (post == null || post.userId != dto.userUuid)
+    if (post == null || post.userUUID != dto.userUUID)
       return {
         error: 'Объявление не принадлежит пользователю или отсутствует',
         status: HttpStatus.BAD_REQUEST,
@@ -154,7 +158,7 @@ export class PostService implements OnModuleInit {
 
     if (dto.deleteImages && dto.deleteImages.length >= 1) {
       const deleteImagesResponse: ImagesDeleteResponse = await firstValueFrom(
-        this.imageSvc.imagesDelete({ uuids: dto.deleteImages }),
+        this.imageSvc.imagesDelete({ UUIDs: dto.deleteImages }),
       );
 
       if (deleteImagesResponse.status == HttpStatus.BAD_REQUEST)
@@ -164,7 +168,7 @@ export class PostService implements OnModuleInit {
         };
 
       dto.deleteImages.map((id) => {
-        post.images = post.images.filter((item) => item.imageUuid !== id);
+        post.images = post.images.filter((item) => item.imageUUID !== id);
       });
     }
 
@@ -172,7 +176,7 @@ export class PostService implements OnModuleInit {
       const response: ImagePostResponse = await firstValueFrom(
         this.imageSvc.imageUploadPost({
           images: dto.createImages,
-          uuid: post.postUuid,
+          UUID: post.postUUID,
         }),
       );
 
@@ -192,6 +196,38 @@ export class PostService implements OnModuleInit {
       }
     }
 
+    await this.postRepository.save(post);
+    return { error: null, status: HttpStatus.OK };
+  }
+
+  public async updateLockState(
+    dto: LockPostStateRequest,
+  ): Promise<LockPostStateResponse> {
+    const post: Post = await this.postRepository.findOne(dto.postUUID);
+
+    if (post == null)
+      return { error: 'Пост не был найден', status: HttpStatus.NOT_FOUND };
+
+    if (dto.userUUID != post.userUUID)
+      return {
+        error: 'Данный пост не принадлежит вам',
+        status: HttpStatus.BAD_REQUEST,
+      };
+
+    post.locked = dto.state;
+    await this.postRepository.save(post);
+    return { error: null, status: HttpStatus.OK };
+  }
+
+  public async updateLockStateAdmin(
+    dto: LockPostAdminStateRequest,
+  ): Promise<LockPostAdminStateResponse> {
+    const post: Post = await this.postRepository.findOne(dto.postUUID);
+
+    if (post == null)
+      return { error: 'Пост не был найден', status: HttpStatus.NOT_FOUND };
+
+    post.lockedByAdmin = dto.state;
     await this.postRepository.save(post);
     return { error: null, status: HttpStatus.OK };
   }

@@ -5,6 +5,7 @@ import {
   CreatePostResponse,
   FindAllPostResponse,
   FindOnePostResponse,
+  LockPostStateResponse,
   POST_SERVICE_NAME,
   UpdateImagesResponse,
   UpdatePostResponse,
@@ -38,5 +39,15 @@ export class PostController {
   @GrpcMethod(POST_SERVICE_NAME, 'UpdateImages')
   private async updateImages(payload): Promise<UpdateImagesResponse> {
     return this.service.updateImages(payload);
+  }
+
+  @GrpcMethod(POST_SERVICE_NAME, 'UpdateLockPost')
+  private async updateLockState(payload): Promise<LockPostStateResponse> {
+    return this.service.updateLockState(payload);
+  }
+
+  @GrpcMethod(POST_SERVICE_NAME, 'UpdateLockPostAdmin')
+  private async updateLockStateAdmin(payload): Promise<LockPostStateResponse> {
+    return this.service.updateLockStateAdmin(payload);
   }
 }
