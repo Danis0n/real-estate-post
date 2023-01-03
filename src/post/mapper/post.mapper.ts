@@ -23,6 +23,8 @@ export class PostMapper {
     post.deal = dto.deal;
     post.type = dto.type;
     post.city = dto.city;
+    post.locked = false;
+    post.lockedByAdmin = false;
     post.location = dto.location;
     post.dateOfCreation = new Date();
     return post;
@@ -61,6 +63,8 @@ export class PostMapper {
     postDto.deal = post.deal;
     postDto.type = post.type;
     postDto.city = post.city;
+    postDto.locked = post.locked;
+    postDto.lockedByAdmin = post.lockedByAdmin;
     postDto.location = post.location;
     postDto.dateOfCreation = post.dateOfCreation.toString();
 

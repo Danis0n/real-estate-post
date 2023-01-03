@@ -17,6 +17,8 @@ export class PostDto implements Post {
   public type!: string;
   public info: PostInfoDto;
   public images!: PostImageDto[];
+  public locked: boolean;
+  public lockedByAdmin: boolean;
 }
 
 export class PostImageDto implements Image {

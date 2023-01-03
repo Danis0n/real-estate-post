@@ -37,6 +37,12 @@ export class Post extends BaseEntity {
   @Column({ name: 'post_property_type', nullable: false, type: 'varchar' })
   public type!: string;
 
+  @Column({ name: 'locked', nullable: false, type: 'boolean' })
+  public locked!: boolean;
+
+  @Column({ name: 'locked_by_admin', nullable: false, type: 'boolean' })
+  public lockedByAdmin!: boolean;
+
   @OneToOne(() => PostInfo, { cascade: true })
   @JoinColumn({ name: 'post_info_id' })
   public info!: PostInfo;

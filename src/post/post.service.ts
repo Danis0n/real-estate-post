@@ -84,6 +84,14 @@ export class PostService implements OnModuleInit {
 
   public async findOne(dto: FindOnePostRequest): Promise<FindOnePostResponse> {
     const post: Post = await this.postRepository.findOne(dto.uuid);
+
+    if (post == null)
+      return {
+        error: 'Пост не был найден',
+        post: null,
+        status: HttpStatus.NOT_FOUND,
+      };
+
     return {
       post: this.postMapper.mapToPostDto(post),
       status: HttpStatus.OK,
@@ -92,7 +100,34 @@ export class PostService implements OnModuleInit {
   }
 
   public async update(dto: UpdatePostRequest): Promise<UpdatePostResponse> {
-    return null;
+    const post: Post = await this.postRepository.findOne(dto.uuid);
+
+    if (post == null || post.userId != dto.userUuid) {
+      return {
+        error: 'Искомый пост не был найден или вы не являетесь владельцем',
+        status: HttpStatus.BAD_REQUEST,
+      };
+    }
+
+    this.updateState(post, dto);
+    await this.postRepository.save(post);
+
+    return { error: null, status: HttpStatus.OK };
+  }
+
+  private updateState(post: Post, dto: UpdatePostRequest) {
+    if (dto.isBalcony != null) post.info.isBalcony = Boolean(dto.isBalcony);
+    if (dto.isParking != null) post.info.isParking = Boolean(dto.isParking);
+    if (dto.isRenovation != null)
+      post.info.isRenovation = Boolean(dto.isRenovation);
+    if (dto.description) post.info.description = dto.description;
+    if (dto.price) post.info.price = Number(dto.price);
+    if (dto.dimensions) post.info.dimensions = dto.dimensions;
+    if (dto.floorHeight) post.info.floorHeight = dto.floorHeight;
+    if (dto.kitchenDimensions)
+      post.info.kitchenDimensions = dto.kitchenDimensions;
+    if (dto.livingDimensions) post.info.livingDimensions = dto.livingDimensions;
+    if (dto.name) post.name = dto.name;
   }
 
   public async updateImages(
@@ -108,8 +143,8 @@ export class PostService implements OnModuleInit {
 
     if (
       post.images.length +
-        (dto.createImages.length ? dto.createImages.length : 0) -
-        (dto.deleteImages.length ? dto.deleteImages.length : 0) >
+        (dto.createImages ? dto.createImages.length : 0) -
+        (dto.deleteImages ? dto.deleteImages.length : 0) >
       10
     )
       return {

@@ -102,6 +102,8 @@ export interface Post {
   type: string;
   info: PostInfo | undefined;
   images: Image[];
+  locked: boolean;
+  lockedByAdmin: boolean;
 }
 
 export interface PostInfo {
