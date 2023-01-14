@@ -4,6 +4,14 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "image";
 
+export interface ImagesViewRowRequest {
+  UUIDs: string[];
+}
+
+export interface ImagesViewRowResponse {
+  images: string[];
+}
+
 export interface ImagesDeleteRequest {
   UUIDs: string[];
 }
@@ -76,6 +84,8 @@ export interface ImageServiceClient {
   imageDelete(request: ImageDeleteRequest): Observable<ImageDeleteResponse>;
 
   imagesDelete(request: ImagesDeleteRequest): Observable<ImagesDeleteResponse>;
+
+  imageViewRow(request: ImagesViewRowRequest): Observable<ImagesViewRowResponse>;
 }
 
 export interface ImageServiceController {
@@ -96,11 +106,22 @@ export interface ImageServiceController {
   imagesDelete(
     request: ImagesDeleteRequest,
   ): Promise<ImagesDeleteResponse> | Observable<ImagesDeleteResponse> | ImagesDeleteResponse;
+
+  imageViewRow(
+    request: ImagesViewRowRequest,
+  ): Promise<ImagesViewRowResponse> | Observable<ImagesViewRowResponse> | ImagesViewRowResponse;
 }
 
 export function ImageServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["imageUploadUser", "imageUploadPost", "imageView", "imageDelete", "imagesDelete"];
+    const grpcMethods: string[] = [
+      "imageUploadUser",
+      "imageUploadPost",
+      "imageView",
+      "imageDelete",
+      "imagesDelete",
+      "imageViewRow",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ImageService", method)(constructor.prototype[method], method, descriptor);

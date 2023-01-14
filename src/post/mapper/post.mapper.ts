@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PostInfo } from '../entity/post.info.entity';
 import { Inject } from '@nestjs/common';
 import { PostImageMapper } from './post.image.mapper';
+import { toFixedNumber } from '../utils/helper/cast.helper';
 
 export class PostMapper {
   @Inject(PostImageMapper)
@@ -36,12 +37,13 @@ export class PostMapper {
     postInfo.description = this.fillData(dto.description);
     postInfo.isBalcony = this.fillData(dto.isBalcony);
     postInfo.isRenovation = this.fillData(dto.isRenovation);
+    postInfo.isLift = this.fillData(dto.isLift);
     postInfo.isParking = this.fillData(dto.isParking);
     postInfo.buildAt = this.fillData(dto.buildAt);
     postInfo.currentFloor = this.fillData(dto.currentFloor);
     postInfo.maxFloor = this.fillData(dto.maxFloor);
-    postInfo.dimensions = dto.dimensions;
-    postInfo.floorHeight = this.fillData(dto.floorHeight);
+    postInfo.dimensions = this.fillData(dto.dimensions);
+    postInfo.floorHeight = this.fillData(toFixedNumber(dto.floorHeight, 1, 10));
     postInfo.houseType = this.fillData(dto.houseType);
     postInfo.roomQuantity = this.fillData(dto.roomQuantity);
     postInfo.kitchenDimensions = this.fillData(dto.kitchenDimensions);
@@ -83,6 +85,7 @@ export class PostMapper {
     postInfoDto.isBalcony = this.fillData(postInfo.isBalcony);
     postInfoDto.isRenovation = this.fillData(postInfo.isRenovation);
     postInfoDto.isParking = this.fillData(postInfo.isParking);
+    postInfoDto.isLift = this.fillData(postInfo.isLift);
     postInfoDto.buildAt = this.fillData(postInfo.buildAt);
     postInfoDto.currentFloor = this.fillData(postInfo.currentFloor);
     postInfoDto.maxFloor = this.fillData(postInfo.maxFloor);

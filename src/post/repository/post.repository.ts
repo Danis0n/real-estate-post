@@ -1,6 +1,7 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '../entity/post.entity';
+import { PostSearchDto } from '../dto/post.search.dto';
 
 export class PostRepository {
   @InjectRepository(Post)
@@ -23,6 +24,43 @@ export class PostRepository {
     return await this.postRepository.findOne({
       where: {
         postUUID: uuid,
+      },
+      relations: {
+        info: true,
+        images: true,
+      },
+    });
+  }
+
+  public async findAllUnlocked() {
+    return await this.postRepository.find({
+      where: {
+        locked: false,
+        lockedByAdmin: false,
+      },
+      relations: {
+        info: true,
+        images: true,
+      },
+    });
+  }
+
+  public async findAllByUser(userUUID: string) {
+    return await this.postRepository.find({
+      where: {
+        userUUID: userUUID,
+      },
+      relations: {
+        info: true,
+        images: true,
+      },
+    });
+  }
+
+  public async findByParams(query: PostSearchDto) {
+    return await this.postRepository.find({
+      where: {
+        info: { ...query },
       },
       relations: {
         info: true,

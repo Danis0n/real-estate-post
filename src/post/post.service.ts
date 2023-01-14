@@ -5,10 +5,12 @@ import {
   ImagePostResponse,
   ImagesDeleteResponse,
   ImageServiceClient,
+  ImagesViewRowResponse,
 } from './proto/image.pb';
 import { ClientGrpc } from '@nestjs/microservices';
 import {
   CreatePostResponse,
+  FindAllPostByUserRequest,
   FindAllPostResponse,
   FindOnePostRequest,
   FindOnePostResponse,
@@ -16,6 +18,7 @@ import {
   LockPostAdminStateResponse,
   LockPostStateRequest,
   LockPostStateResponse,
+  SearchPostRequest,
   UpdateImagesRequest,
   UpdateImagesResponse,
   UpdatePostRequest,
@@ -28,6 +31,8 @@ import { firstValueFrom } from 'rxjs';
 import { PostImageMapper } from './mapper/post.image.mapper';
 import { PostImage } from './entity/image.info.entity';
 import { PostImageRepository } from './repository/post.image.repository';
+import { PostSearchDto } from './dto/post.search.dto';
+import { toFixedNumber } from './utils/helper/cast.helper';
 
 @Injectable()
 export class PostService implements OnModuleInit {
@@ -83,24 +88,123 @@ export class PostService implements OnModuleInit {
     const posts: Post[] = await this.postRepository.findAll();
     const postsDto: PostDto[] = this.postMapper.mapToArrayPostDto(posts);
 
+    for (const dtoPost of postsDto) {
+      await this.fetchImages(dtoPost);
+    }
+
+    return { posts: postsDto };
+  }
+
+  public async searchParams({
+    query,
+  }: SearchPostRequest): Promise<FindAllPostResponse> {
+    const search: PostSearchDto = new PostSearchDto();
+
+    if (query.parking) search.isParking = query.parking;
+    if (query.balcony) search.isBalcony = query.balcony;
+    if (query.lift) search.isLift = query.lift;
+    if (query.renovation) search.isRenovation = query.renovation;
+    if (query.rooms) search.roomQuantity = query.rooms;
+    if (query.height) search.floorHeight = toFixedNumber(query.height, 1, 10);
+
+    let filteredPosts: Post[] = await this.postRepository.findByParams(search);
+
+    if (query.minPrice)
+      filteredPosts = filteredPosts.filter(
+        (post) => post.info.price >= query.minPrice,
+      );
+    if (query.maxPrice)
+      filteredPosts = filteredPosts.filter(
+        (post) => post.info.price <= query.maxPrice,
+      );
+
+    if (query.minCommon)
+      filteredPosts = filteredPosts.filter(
+        (post) => post.info.dimensions >= query.minCommon,
+      );
+    if (query.maxCommon)
+      filteredPosts = filteredPosts.filter(
+        (post) => post.info.dimensions <= query.maxCommon,
+      );
+
+    if (query.minLiving)
+      filteredPosts = filteredPosts.filter(
+        (post) => post.info.livingDimensions >= query.minLiving,
+      );
+    if (query.maxLiving)
+      filteredPosts = filteredPosts.filter(
+        (post) => post.info.livingDimensions <= query.maxLiving,
+      );
+
+    if (query.minKitchen)
+      filteredPosts = filteredPosts.filter(
+        (post) => post.info.kitchenDimensions >= query.minKitchen,
+      );
+    if (query.maxKitchen)
+      filteredPosts = filteredPosts.filter(
+        (post) => post.info.kitchenDimensions <= query.maxKitchen,
+      );
+
+    console.log(filteredPosts.length);
+    return { posts: [] };
+  }
+
+  public async findAllByUser(
+    dto: FindAllPostByUserRequest,
+  ): Promise<FindAllPostResponse> {
+    const posts: Post[] = await this.postRepository.findAllByUser(dto.userUUID);
+    const postsDto: PostDto[] = this.postMapper.mapToArrayPostDto(posts);
+
+    return { posts: postsDto };
+  }
+
+  public async findAllUnlocked(): Promise<FindAllPostResponse> {
+    const posts: Post[] = await this.postRepository.findAllUnlocked();
+    const postsDto: PostDto[] = this.postMapper.mapToArrayPostDto(posts);
+
+    for (const dtoPost of postsDto) {
+      await this.fetchImages(dtoPost);
+    }
+
     return { posts: postsDto };
   }
 
   public async findOne(dto: FindOnePostRequest): Promise<FindOnePostResponse> {
     const post: Post = await this.postRepository.findOne(dto.UUID);
 
-    if (post == null)
+    if (post == null || post.locked || post.lockedByAdmin)
       return {
         error: 'Пост не был найден',
         post: null,
         status: HttpStatus.NOT_FOUND,
       };
 
+    const dtoPost: PostDto = this.postMapper.mapToPostDto(post);
+    await this.fetchImages(dtoPost);
+
     return {
-      post: this.postMapper.mapToPostDto(post),
+      post: dtoPost,
       status: HttpStatus.OK,
       error: null,
     };
+  }
+
+  private async fetchImages(dtoPost: PostDto) {
+    const UUIDs: string[] = [];
+
+    dtoPost.images.map((image) => {
+      UUIDs.push(image.imageUuid);
+    });
+
+    const response: ImagesViewRowResponse = await firstValueFrom(
+      this.imageSvc.imageViewRow({ UUIDs: UUIDs }),
+    );
+
+    if (response.images.length === dtoPost.images.length) {
+      dtoPost.images.map((image, index) => {
+        image.buffer = response.images[index];
+      });
+    }
   }
 
   public async update(dto: UpdatePostRequest): Promise<UpdatePostResponse> {

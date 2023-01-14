@@ -8,10 +8,10 @@ export class PostInfo extends BaseEntity {
   @Column({ name: 'price', nullable: false, type: 'numeric' })
   public price!: number;
 
-  @Column({ name: 'floor_height', nullable: true, type: 'varchar' })
-  public floorHeight!: string;
+  @Column({ name: 'floor_height', nullable: true, type: 'numeric' })
+  public floorHeight!: number;
 
-  @Column({ name: 'max_floor', nullable: true, type: 'integer' })
+  @Column({ name: 'max_floor', nullable: true, type: 'numeric' })
   public maxFloor!: number;
 
   @Column({ name: 'current_floor', nullable: true, type: 'integer' })
@@ -26,20 +26,23 @@ export class PostInfo extends BaseEntity {
   @Column({ name: 'balcony', nullable: true, type: 'boolean' })
   public isBalcony!: boolean;
 
+  @Column({ name: 'lift', nullable: true, type: 'boolean' })
+  public isLift!: boolean;
+
   @Column({ name: 'renovation', nullable: true, type: 'boolean' })
   public isRenovation!: boolean;
 
   @Column({ name: 'room_quantity', nullable: true, type: 'integer' })
-  public roomQuantity!: string;
+  public roomQuantity!: number;
 
-  @Column({ name: 'dimensions', nullable: false, type: 'varchar' })
-  public dimensions!: string;
+  @Column({ name: 'dimensions', nullable: false, type: 'numeric' })
+  public dimensions!: number;
 
-  @Column({ name: 'kitchen_dimensions', nullable: true, type: 'varchar' })
-  public kitchenDimensions!: string;
+  @Column({ name: 'kitchen_dimensions', nullable: true, type: 'numeric' })
+  public kitchenDimensions!: number;
 
-  @Column({ name: 'living_dimensions', nullable: true, type: 'varchar' })
-  public livingDimensions!: string;
+  @Column({ name: 'living_dimensions', nullable: true, type: 'numeric' })
+  public livingDimensions!: number;
 
   @Column({ name: 'build_year', nullable: true, type: 'integer' })
   public buildAt!: string;

@@ -4,6 +4,35 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "post";
 
+export interface SearchPostQuery {
+  rooms: number;
+  height: number;
+  minPrice: number;
+  maxPrice: number;
+  minCommon: number;
+  maxCommon: number;
+  minKitchen: number;
+  maxKitchen: number;
+  minLiving: number;
+  maxLiving: number;
+  parking: boolean;
+  balcony: boolean;
+  lift: boolean;
+  renovation: boolean;
+}
+
+export interface SearchPostResponse {
+  posts: Post[];
+}
+
+export interface SearchPostRequest {
+  query: SearchPostQuery | undefined;
+}
+
+export interface FindAllPostByUserRequest {
+  userUUID: string;
+}
+
 export interface LockPostAdminStateRequest {
   postUUID: string;
   state: boolean;
@@ -27,14 +56,14 @@ export interface LockPostStateResponse {
 
 export interface UpdatePostRequest {
   name: string;
-  price: string;
-  floorHeight: string;
+  price: number;
+  floorHeight: number;
   isParking: boolean;
   isBalcony: boolean;
   isRenovation: boolean;
-  dimensions: string;
-  kitchenDimensions: string;
-  livingDimensions: string;
+  dimensions: number;
+  kitchenDimensions: number;
+  livingDimensions: number;
   description: string;
   UUID: string;
   userUUID: string;
@@ -67,18 +96,18 @@ export interface ImageCreate {
 
 export interface CreatePostRequest {
   name: string;
-  price: string;
-  floorHeight: string;
+  price: number;
+  floorHeight: number;
   maxFloor: number;
   currentFloor: number;
   houseType: string;
   isParking: boolean;
   isBalcony: boolean;
   isRenovation: boolean;
-  roomQuantity: string;
-  dimensions: string;
-  kitchenDimensions: string;
-  livingDimensions: string;
+  roomQuantity: number;
+  dimensions: number;
+  kitchenDimensions: number;
+  livingDimensions: number;
   buildAt: string;
   description: string;
   city: string;
@@ -87,6 +116,7 @@ export interface CreatePostRequest {
   type: string;
   userUUID: string;
   images: ImageCreate[];
+  isLift: boolean;
 }
 
 export interface CreatePostResponse {
@@ -130,23 +160,25 @@ export interface Post {
 export interface PostInfo {
   infoId: string;
   price: number;
-  floorHeight: string;
+  floorHeight: number;
   maxFloor: number;
   currentFloor: number;
   houseType: string;
   isParking: boolean;
   isBalcony: boolean;
   isRenovation: boolean;
-  roomQuantity: string;
-  dimensions: string;
-  kitchenDimensions: string;
-  livingDimensions: string;
+  roomQuantity: number;
+  dimensions: number;
+  kitchenDimensions: number;
+  livingDimensions: number;
   buildAt: string;
   description: string;
+  isLift: boolean;
 }
 
 export interface Image {
   imageUuid: string;
+  buffer: string;
   date: string;
 }
 
@@ -159,13 +191,19 @@ export interface PostServiceClient {
 
   findAll(request: FindAllPostRequest): Observable<FindAllPostResponse>;
 
+  findAllUnlocked(request: FindAllPostRequest): Observable<FindAllPostResponse>;
+
+  findAllByUser(request: FindAllPostByUserRequest): Observable<FindAllPostResponse>;
+
   updateImages(request: UpdateImagesRequest): Observable<UpdateImagesResponse>;
 
   updatePost(request: UpdatePostRequest): Observable<UpdatePostResponse>;
 
-  updateLockPostRequest(request: LockPostStateRequest): Observable<LockPostStateResponse>;
+  updateLockPost(request: LockPostStateRequest): Observable<LockPostStateResponse>;
 
-  updateLockPostAdminRequest(request: LockPostAdminStateRequest): Observable<LockPostAdminStateResponse>;
+  updateLockPostAdmin(request: LockPostAdminStateRequest): Observable<LockPostAdminStateResponse>;
+
+  searchPostParams(request: SearchPostRequest): Observable<SearchPostResponse>;
 }
 
 export interface PostServiceController {
@@ -179,6 +217,14 @@ export interface PostServiceController {
     request: FindAllPostRequest,
   ): Promise<FindAllPostResponse> | Observable<FindAllPostResponse> | FindAllPostResponse;
 
+  findAllUnlocked(
+    request: FindAllPostRequest,
+  ): Promise<FindAllPostResponse> | Observable<FindAllPostResponse> | FindAllPostResponse;
+
+  findAllByUser(
+    request: FindAllPostByUserRequest,
+  ): Promise<FindAllPostResponse> | Observable<FindAllPostResponse> | FindAllPostResponse;
+
   updateImages(
     request: UpdateImagesRequest,
   ): Promise<UpdateImagesResponse> | Observable<UpdateImagesResponse> | UpdateImagesResponse;
@@ -187,13 +233,17 @@ export interface PostServiceController {
     request: UpdatePostRequest,
   ): Promise<UpdatePostResponse> | Observable<UpdatePostResponse> | UpdatePostResponse;
 
-  updateLockPostRequest(
+  updateLockPost(
     request: LockPostStateRequest,
   ): Promise<LockPostStateResponse> | Observable<LockPostStateResponse> | LockPostStateResponse;
 
-  updateLockPostAdminRequest(
+  updateLockPostAdmin(
     request: LockPostAdminStateRequest,
   ): Promise<LockPostAdminStateResponse> | Observable<LockPostAdminStateResponse> | LockPostAdminStateResponse;
+
+  searchPostParams(
+    request: SearchPostRequest,
+  ): Promise<SearchPostResponse> | Observable<SearchPostResponse> | SearchPostResponse;
 }
 
 export function PostServiceControllerMethods() {
@@ -202,10 +252,13 @@ export function PostServiceControllerMethods() {
       "create",
       "findOne",
       "findAll",
+      "findAllUnlocked",
+      "findAllByUser",
       "updateImages",
       "updatePost",
-      "updateLockPostRequest",
-      "updateLockPostAdminRequest",
+      "updateLockPost",
+      "updateLockPostAdmin",
+      "searchPostParams",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

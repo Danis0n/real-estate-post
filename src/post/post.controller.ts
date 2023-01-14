@@ -26,9 +26,24 @@ export class PostController {
     return this.service.findOne(payload);
   }
 
+  @GrpcMethod(POST_SERVICE_NAME, 'SearchPostParams')
+  private async searchParams(payload): Promise<FindAllPostResponse> {
+    return this.service.searchParams(payload);
+  }
+
   @GrpcMethod(POST_SERVICE_NAME, 'FindAll')
   private async findAll(): Promise<FindAllPostResponse> {
     return this.service.findAll();
+  }
+
+  @GrpcMethod(POST_SERVICE_NAME, 'FindAllUnlocked')
+  private async findAllUnlocked(): Promise<FindAllPostResponse> {
+    return this.service.findAllUnlocked();
+  }
+
+  @GrpcMethod(POST_SERVICE_NAME, 'FindAllByUser')
+  private async findAllByUser(payload): Promise<FindAllPostResponse> {
+    return this.service.findAllByUser(payload);
   }
 
   @GrpcMethod(POST_SERVICE_NAME, 'UpdatePost')
