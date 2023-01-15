@@ -4,6 +4,18 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "post";
 
+export interface FindLatestRequest {
+}
+
+export interface SearchPostNameRequest {
+  name: string;
+}
+
+export interface SearchPostNameResponse {
+  posts: Post[];
+  isSuccess: boolean;
+}
+
 export interface SearchPostQuery {
   rooms: number;
   height: number;
@@ -19,10 +31,6 @@ export interface SearchPostQuery {
   balcony: boolean;
   lift: boolean;
   renovation: boolean;
-}
-
-export interface SearchPostResponse {
-  posts: Post[];
 }
 
 export interface SearchPostRequest {
@@ -203,7 +211,11 @@ export interface PostServiceClient {
 
   updateLockPostAdmin(request: LockPostAdminStateRequest): Observable<LockPostAdminStateResponse>;
 
-  searchPostParams(request: SearchPostRequest): Observable<SearchPostResponse>;
+  searchPostParams(request: SearchPostRequest): Observable<FindAllPostResponse>;
+
+  searchPostName(request: SearchPostNameRequest): Observable<SearchPostNameResponse>;
+
+  findLatest(request: FindLatestRequest): Observable<FindAllPostResponse>;
 }
 
 export interface PostServiceController {
@@ -243,7 +255,15 @@ export interface PostServiceController {
 
   searchPostParams(
     request: SearchPostRequest,
-  ): Promise<SearchPostResponse> | Observable<SearchPostResponse> | SearchPostResponse;
+  ): Promise<FindAllPostResponse> | Observable<FindAllPostResponse> | FindAllPostResponse;
+
+  searchPostName(
+    request: SearchPostNameRequest,
+  ): Promise<SearchPostNameResponse> | Observable<SearchPostNameResponse> | SearchPostNameResponse;
+
+  findLatest(
+    request: FindLatestRequest,
+  ): Promise<FindAllPostResponse> | Observable<FindAllPostResponse> | FindAllPostResponse;
 }
 
 export function PostServiceControllerMethods() {
@@ -259,6 +279,8 @@ export function PostServiceControllerMethods() {
       "updateLockPost",
       "updateLockPostAdmin",
       "searchPostParams",
+      "searchPostName",
+      "findLatest",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

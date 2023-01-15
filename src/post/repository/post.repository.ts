@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post } from '../entity/post.entity';
 import { PostSearchDto } from '../dto/post.search.dto';
@@ -61,6 +61,28 @@ export class PostRepository {
     return await this.postRepository.find({
       where: {
         info: { ...query },
+      },
+      relations: {
+        info: true,
+        images: true,
+      },
+    });
+  }
+
+  public async findLatest() {
+    return await this.postRepository.find({
+      relations: {
+        info: true,
+        images: true,
+      },
+      order: { postUUID: 'DESC' },
+    });
+  }
+
+  public async findByName(name: string) {
+    return await this.postRepository.find({
+      where: {
+        name: ILike(`%${name}%`),
       },
       relations: {
         info: true,

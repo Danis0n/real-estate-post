@@ -6,7 +6,7 @@ import {
   FindAllPostResponse,
   FindOnePostResponse,
   LockPostStateResponse,
-  POST_SERVICE_NAME,
+  POST_SERVICE_NAME, SearchPostNameResponse,
   UpdateImagesResponse,
   UpdatePostResponse,
 } from './proto/post.pb';
@@ -29,6 +29,16 @@ export class PostController {
   @GrpcMethod(POST_SERVICE_NAME, 'SearchPostParams')
   private async searchParams(payload): Promise<FindAllPostResponse> {
     return this.service.searchParams(payload);
+  }
+
+  @GrpcMethod(POST_SERVICE_NAME, 'SearchPostName')
+  private async searchName(payload): Promise<SearchPostNameResponse> {
+    return this.service.searchName(payload);
+  }
+
+  @GrpcMethod(POST_SERVICE_NAME, 'FindLatest')
+  private async findLatest(): Promise<FindAllPostResponse> {
+    return this.service.findLatest();
   }
 
   @GrpcMethod(POST_SERVICE_NAME, 'FindAll')

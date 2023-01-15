@@ -18,6 +18,8 @@ import {
   LockPostAdminStateResponse,
   LockPostStateRequest,
   LockPostStateResponse,
+  SearchPostNameRequest,
+  SearchPostNameResponse,
   SearchPostRequest,
   UpdateImagesRequest,
   UpdateImagesResponse,
@@ -145,8 +147,12 @@ export class PostService implements OnModuleInit {
         (post) => post.info.kitchenDimensions <= query.maxKitchen,
       );
 
-    console.log(filteredPosts.length);
-    return { posts: [] };
+    const postsDto: PostDto[] =
+      this.postMapper.mapToArrayPostDto(filteredPosts);
+    for (const dtoPost of postsDto) {
+      await this.fetchImages(dtoPost);
+    }
+    return { posts: postsDto };
   }
 
   public async findAllByUser(
@@ -221,21 +227,6 @@ export class PostService implements OnModuleInit {
     await this.postRepository.save(post);
 
     return { error: null, status: HttpStatus.OK };
-  }
-
-  private updateState(post: Post, dto: UpdatePostRequest) {
-    if (dto.isBalcony != null) post.info.isBalcony = dto.isBalcony;
-    if (dto.isParking != null) post.info.isParking = dto.isParking;
-    if (dto.isRenovation != null)
-      post.info.isRenovation = Boolean(dto.isRenovation);
-    if (dto.description) post.info.description = dto.description;
-    if (dto.price) post.info.price = Number(dto.price);
-    if (dto.dimensions) post.info.dimensions = dto.dimensions;
-    if (dto.floorHeight) post.info.floorHeight = dto.floorHeight;
-    if (dto.kitchenDimensions)
-      post.info.kitchenDimensions = dto.kitchenDimensions;
-    if (dto.livingDimensions) post.info.livingDimensions = dto.livingDimensions;
-    if (dto.name) post.name = dto.name;
   }
 
   public async updateImages(
@@ -334,5 +325,48 @@ export class PostService implements OnModuleInit {
     post.lockedByAdmin = dto.state;
     await this.postRepository.save(post);
     return { error: null, status: HttpStatus.OK };
+  }
+
+  public async searchName(
+    dto: SearchPostNameRequest,
+  ): Promise<SearchPostNameResponse> {
+    const posts: Post[] = await this.postRepository.findByName(dto.name);
+    const postsDto: PostDto[] = this.postMapper.mapToArrayPostDto(posts);
+
+    if (postsDto.length === 0) return { isSuccess: false, posts: [] };
+
+    for (const dtoPost of postsDto) {
+      await this.fetchImages(dtoPost);
+    }
+
+    return { isSuccess: true, posts: postsDto };
+  }
+
+  public async findLatest(): Promise<FindAllPostResponse> {
+    const posts: Post[] = await this.postRepository.findLatest();
+    let postsDto: PostDto[] = this.postMapper.mapToArrayPostDto(posts);
+
+    postsDto = postsDto.slice(0, 4);
+
+    for (const dtoPost of postsDto) {
+      await this.fetchImages(dtoPost);
+    }
+
+    return { posts: postsDto };
+  }
+
+  private updateState(post: Post, dto: UpdatePostRequest) {
+    if (dto.isBalcony != null) post.info.isBalcony = dto.isBalcony;
+    if (dto.isParking != null) post.info.isParking = dto.isParking;
+    if (dto.isRenovation != null)
+      post.info.isRenovation = Boolean(dto.isRenovation);
+    if (dto.description) post.info.description = dto.description;
+    if (dto.price) post.info.price = Number(dto.price);
+    if (dto.dimensions) post.info.dimensions = dto.dimensions;
+    if (dto.floorHeight) post.info.floorHeight = dto.floorHeight;
+    if (dto.kitchenDimensions)
+      post.info.kitchenDimensions = dto.kitchenDimensions;
+    if (dto.livingDimensions) post.info.livingDimensions = dto.livingDimensions;
+    if (dto.name) post.name = dto.name;
   }
 }
